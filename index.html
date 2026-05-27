@@ -88,9 +88,14 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // 初始化地圖
         var map = L.map('map', { minZoom: 6 }).setView([23.6, 121.0], 7); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 
+        // 建立一個圖層群組來統一管理標記，這樣切換季節時才能方便地清除舊標記
+        var markerGroup = L.layerGroup().addTo(map);
+
+        // 漁獲資料陣列
         var regions = [
             { season: "春季", seasonColor: "bg-success", name: "東部海域 (花東外海)", pos: [23.5, 121.8], fish: "鬼頭刀 (飛烏虎)", scientificName: "Mahi-mahi / Coryphaena hippurus", status: "供給正常", imgSrc: "Mahi-mahi.jpg", label: "野生捕撈", ecoList: ["生長極為快速，約一年即可達成熟體型。", "屬於表層洄游性魚類，適合替代大型鮪魚。", "建議選擇「一支釣」等友善漁法來源。"] },
             { season: "夏季", seasonColor: "bg-danger", name: "南部海域 (台南、高雄)", pos: [22.8, 120.1], fish: "虱目魚", scientificName: "Milkfish / Chanos chanos", status: "供給正常", imgSrc: "Milkfish.jpg", label: "在地養殖", ecoList: ["草食與雜食性，屬於食物鏈底層，生態負擔小。", "轉換飼料效率高，水產養殖碳排放較低。", "在地養殖技術成熟，族群數量穩定。"] },
@@ -98,10 +103,22 @@
             { season: "冬季", seasonColor: "bg-primary", name: "西南部海域 (新竹至台南)", pos: [24.0, 119.8], fish: "養殖烏魚", scientificName: "Flathead grey mullet / Mugil cephalus", status: "供給正常", imgSrc: "Flathead grey mullet.jpg", label: "在地養殖", ecoList: ["選擇養殖烏魚可大幅減少對野生洄游族群的捕撈壓力。", "屬於草雜食性，轉換飼料效率高。", "魚肉與魚卵皆可完全利用。"] }
         ];
 
-        regions.forEach(reg => {
-            L.circleMarker(reg.pos, { color: '#0d6efd', fillColor: '#0d6efd', fillOpacity: 0.7, radius: 12 }).addTo(map).on('click', () => showFishDetail(reg));
-        });
+        // 渲染指定季節標記的函數
+        function renderMarkers(targetSeason) {
+            // 1. 先清除地圖上現有的所有標記
+            markerGroup.clearLayers();
 
+            // 2. 篩選並加入符合該季節的標記
+            regions.forEach(reg => {
+                if (reg.season.includes(targetSeason)) {
+                    L.circleMarker(reg.pos, { color: '#0d6efd', fillColor: '#0d6efd', fillOpacity: 0.7, radius: 12 })
+                    .addTo(markerGroup)
+                    .on('click', () => showFishDetail(reg));
+                }
+            });
+        }
+
+        // 顯示漁獲詳細資訊
         function showFishDetail(data) {
             document.getElementById('emptyState').classList.add('d-none');
             const detailCard = document.getElementById('fishDetailCard');
@@ -125,10 +142,27 @@
             document.getElementById('infoSection').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // 切換季節功能
         function updateSeason(season, btnElement) {
-            document.querySelectorAll('.season-btn').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-light'); });
-            btnElement.classList.remove('btn-light'); btnElement.classList.add('btn-primary');
+            // 更新按鈕樣式
+            document.querySelectorAll('.season-btn').forEach(b => { 
+                b.classList.remove('btn-primary'); 
+                b.classList.add('btn-light'); 
+            });
+            btnElement.classList.remove('btn-light'); 
+            btnElement.classList.add('btn-primary');
+
+            // 重新渲染該季節的標記
+            renderMarkers(season);
+
+            // 切換季節時，將詳細資訊隱藏，恢復成提示點擊的狀態
+            document.getElementById('emptyState').classList.remove('d-none');
+            document.getElementById('fishDetailCard').classList.add('d-none');
         }
+
+        // 頁面載入時，預設顯示「春季」的資料
+        renderMarkers('春');
+
     </script>
 </body>
 </html>
