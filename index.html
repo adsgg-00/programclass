@@ -5,358 +5,256 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>臺灣海域漁獲動態視覺圖 - 期末專案</title>
     
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        :root {
-            --google-blue: #1a73e8;
-            --ocean-dark: #005b9f;
-            --panel-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
-            --text-main: #3c4043;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
+        /* 基礎網頁設定 (恢復可滾動) */
+        body { 
+            background-color: #f8f9fa; /* 淺灰色背景讓區塊更立體 */
             font-family: 'Google Sans', Roboto, Arial, sans-serif;
-            overflow: hidden;
         }
 
-        #map {
-            height: 100%;
+        /* 頂部導覽列樣式 */
+        .navbar-custom {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 地圖容器設定 (變成小視窗) */
+        .map-container {
+            position: relative;
+            height: 450px; /* 固定高度，可依需求調整 */
             width: 100%;
-            z-index: 1;
+            border-radius: 12px;
+            overflow: hidden; /* 確保地圖不會超出圓角 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 4px solid white;
         }
+        #map { height: 100%; width: 100%; z-index: 1; }
 
-        .google-header {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 1000;
-            background: white;
-            width: 392px;
-            border-radius: 8px;
-            box-shadow: var(--panel-shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .header-top {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-        }
-        .project-title {
-            font-size: 18px;
-            color: var(--text-main);
-            flex-grow: 1;
-            font-weight: 500;
-        }
-        .sdg-badge {
-            width: 32px;
-            height: 32px;
-            background-color: #0a97d9;
-            color: white;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .hero-section {
-            padding: 0 16px 12px 16px;
-            font-size: 13px;
-            color: #70757a;
-            border-top: 1px solid #e8eaed;
-            padding-top: 10px;
-        }
-
+        /* 季節按鈕區 (保持在地圖內浮動) */
         .season-controls {
-            position: absolute;
-            right: 12px;
-            top: 12px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            position: absolute; right: 15px; top: 15px; z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px;
         }
         .season-btn {
-            background: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            box-shadow: var(--panel-shadow);
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--text-main);
-            font-weight: 500;
+            width: 45px; height: 45px; border-radius: 50%;
+            font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             transition: all 0.2s;
         }
-        .season-btn.active {
-            background-color: var(--google-blue);
-            color: white;
+
+        /* 下方資訊區塊照片設定 */
+        .fish-img-large { 
+            width: 100%; 
+            height: 300px; 
+            object-fit: cover; 
+            border-radius: 8px; 
         }
 
-        .info-card {
-            position: absolute;
-            left: 12px;
-            top: 160px;
-            z-index: 1000;
-            width: 392px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: var(--panel-shadow);
-            max-height: calc(100% - 200px);
-            overflow-y: auto;
-            display: none;
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .info-card-header {
-            padding: 16px;
-            border-bottom: 1px solid #e8eaed;
-        }
-        .fish-status {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-left: 8px;
-        }
-        .status-normal { background: #e6f4ea; color: #1e8e3e; }
-        .status-warn { background: #fce8e6; color: #d93025; }
-        
-        .info-content { padding: 16px; }
-        
-        .fish-img-box {
-            width: 100%;
-            height: 180px;
-            background: #f1f3f4;
-            border-radius: 8px;
-            margin-bottom: 12px;
+        /* 預設提示區塊 */
+        #emptyState {
+            min-height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #70757a;
-            overflow: hidden;
-        }
-        .fish-img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .eco-label {
-            display: inline-block;
-            background: #f1f3f4;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            margin-bottom: 12px;
-            color: var(--ocean-dark);
-            font-weight: bold;
-        }
-        .eco-list {
-            margin: 0; padding-left: 20px;
-            font-size: 14px; line-height: 1.6;
-            color: var(--text-main);
-        }
-        .eco-list li {
-            margin-bottom: 6px;
-        }
-
-        .mini-footer {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: rgba(255,255,255,0.8);
-            padding: 2px 8px;
-            font-size: 11px;
-            color: #70757a;
-            z-index: 1000;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
 
-    <div class="google-header">
-        <div class="header-top">
-            <div class="project-title">臺灣海域漁獲動態視覺圖</div>
-            <div class="sdg-badge">SDG<br>14</div>
-        </div>
-        <div class="hero-section">
-            結合海洋保育及責任消費。旨在引導大眾「吃對海鮮」，守護正在悄悄消失的海洋資源。
-        </div>
-    </div>
-
-    <div id="map"></div>
-
-    <div class="season-controls">
-        <button class="season-btn active" onclick="updateSeason('春')">春</button>
-        <button class="season-btn" onclick="updateSeason('夏')">夏</button>
-        <button class="season-btn" onclick="updateSeason('秋')">秋</button>
-        <button class="season-btn" onclick="updateSeason('冬')">冬</button>
-    </div>
-
-    <div class="info-card" id="fishCard">
-        <div class="info-card-header">
-            <span style="font-size: 20px; font-weight: 500;" id="cardTitle">魚種名稱</span>
-            <span class="fish-status status-normal" id="cardStatus">供給狀態</span>
-        </div>
-        <div class="info-content">
-            <div class="fish-img-box" id="cardImg">
-                [照片載入中...]
+    <!-- 1. 網頁頂部標頭 -->
+    <nav class="navbar navbar-custom sticky-top py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0 text-primary fw-bold">臺灣海域漁獲動態視覺圖</h4>
+                <small class="text-muted">結合海洋保育及責任消費，引導大眾「吃對海鮮」。</small>
             </div>
-            <div class="eco-label" id="cardLabel">來源標籤</div>
-            <ul class="eco-list" id="cardEcoList">
-            </ul>
+            <span class="badge bg-info text-dark fs-6 px-3 py-2">SDG 14 永續海洋與保育</span>
         </div>
+    </nav>
+
+    <div class="container my-4">
+        
+        <!-- 2. 地圖區塊 (上半部) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <!-- 四季按鈕 -->
+                    <div class="season-controls">
+                        <button class="btn btn-primary season-btn" onclick="updateSeason('春', this)">春</button>
+                        <button class="btn btn-light season-btn" onclick="updateSeason('夏', this)">夏</button>
+                        <button class="btn btn-light season-btn" onclick="updateSeason('秋', this)">秋</button>
+                        <button class="btn btn-light season-btn" onclick="updateSeason('冬', this)">冬</button>
+                    </div>
+                </div>
+                <p class="text-muted small mt-2 text-center">💡 提示：點擊地圖上的藍色圓點，即可查看該海域的詳細漁獲資訊。</p>
+            </div>
+        </div>
+
+        <!-- 3. 詳細資訊區塊 (下半部，可滾動) -->
+        <div class="row pb-5" id="infoSection">
+            <div class="col-12">
+                <h3 class="fw-bold mb-3 border-bottom pb-2">📍 漁獲詳細資訊</h3>
+                
+                <!-- 狀態A：還沒點擊時顯示的預設畫面 -->
+                <div id="emptyState" class="bg-white">
+                    <h5>👆 請在地圖上選擇一個海域</h5>
+                </div>
+
+                <!-- 狀態B：點擊後顯示的詳細卡片 (預設隱藏) -->
+                <div class="card shadow-sm border-0 d-none" id="fishDetailCard">
+                    <div class="row g-0">
+                        <!-- 左側：照片 -->
+                        <div class="col-md-5 p-3">
+                            <div class="bg-light rounded text-center h-100 d-flex align-items-center" id="cardImgContainer">
+                                <!-- 圖片將由 JS 插入 -->
+                            </div>
+                        </div>
+                        <!-- 右側：文字資訊 -->
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <h2 class="card-title fw-bold text-dark mb-0 me-3" id="cardTitle">魚種名稱</h2>
+                                    <span class="badge bg-success fs-6" id="cardStatus">供給狀態</span>
+                                </div>
+                                
+                                <p class="text-muted mb-4"><span class="badge bg-secondary me-2" id="cardLabel">來源</span> <span id="cardRegion">海域位置</span></p>
+                                
+                                <h5 class="fw-bold text-primary mb-3">🌱 生態指標與保育建議</h5>
+                                <ul class="list-group list-group-flush" id="cardEcoList">
+                                    <!-- 清單由 JS 插入 -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
     </div>
 
-    <div class="mini-footer">
-        開發團隊：第二十組 (商逢育、李庭宇、吳絃竑) | 資料來源：臺灣魚類資料庫、海洋保育署
-    </div>
+    <!-- 頁尾 -->
+    <footer class="bg-dark text-light py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-1">開發團隊：第二十組 (商逢育、李庭宇、吳絃竑)</p>
+            <p class="mb-0 small text-muted">資料來源：臺灣魚類資料庫、海洋保育署、臺灣海鮮選擇指南</p>
+        </div>
+    </footer>
 
+    <!-- 引入 Bootstrap JS 與 Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        // 定義台灣及其周邊海域的邊界 (西南角座標, 東北角座標)
-        var taiwanBounds = L.latLngBounds(
-            [21.0, 118.5], 
-            [26.0, 122.5]  
-        );
+        // 設定臺灣海域的經緯度邊界 (西南角, 東北角)
+        var taiwanBounds = [
+            [21.0, 118.5], // 西南角 (大約在巴士海峽附近)
+            [26.0, 123.0]  // 東北角 (大約在彭佳嶼以北)
+        ];
 
-        // 初始化地圖，並加入邊界與縮放限制
-        var map = L.map('map', {
-            zoomControl: false,
-            maxBounds: taiwanBounds,     
-            maxBoundsViscosity: 1.0,     
-            minZoom: 7,                  
-            maxZoom: 12                  
-        }).setView([23.8, 120.5], 7);
-
-        // ★ 更新：將圖層改為混合衛星圖 (Satellite + Labels) 
-        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=zh-TW', {
-            attribution: '&copy; Google Maps',
-            maxZoom: 20
+        // 初始化地圖
+        var map = L.map('map', { 
+            zoomControl: true,
+            maxBounds: taiwanBounds,      // 限制拖曳的最大邊界
+            maxBoundsViscosity: 1.0,      // 讓邊界完全卡死，沒有橡皮筋彈性效果
+            minZoom: 6                    // 限制縮小級別，防止縮小到看見全世界
+        }).setView([23.6, 121.0], 7); 
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
+        // 漁獲資料庫
         var regions = [
             { 
-                name: "北部海域 (基隆北海岸)", 
-                pos: [25.3, 121.7], 
-                fish: "鎖管 (小卷)", 
-                status: "供給正常",
-                imgSrc: "jpg.4.jpg",
-                label: "沿海捕撈",
-                ecoList: [
-                    "北部海域重要經濟漁獲。",
-                    "建議選擇棒受網等對環境衝擊較小的漁法。",
-                    "生長週期短，資源恢復力相對較佳。"
-                ]
+                name: "西部海域 (嘉義外海)", pos: [23.45, 120.0], fish: "牡蠣 (蚵仔)", status: "供給正常", 
+                imgSrc: "jpg.1.jpg", label: "在地養殖", 
+                ecoList: ["屬於濾食性雙殼貝類，無須投餵人工飼料。", "具有淨化水質的功能，對海洋環境極為友善。", "在地生產，運輸距離短，碳足跡極低。"] 
             },
             { 
-                name: "西部海域 (嘉義外海)", 
-                pos: [23.45, 120.0], 
-                fish: "牡蠣 (蚵仔)", 
-                status: "供給正常",
-                imgSrc: "jpg.1.jpg",
-                label: "在地養殖",
-                ecoList: [
-                    "濾食性雙殼貝類，無須人工飼料。",
-                    "能淨化水質，對海洋環境友善。",
-                    "在地生產，碳足跡極低。"
-                ]
+                name: "南部海域 (台南高雄)", pos: [22.8, 120.1], fish: "虱目魚", status: "供給正常", 
+                imgSrc: "jpg.2.jpg", label: "在地養殖", 
+                ecoList: ["草食與雜食性，屬於食物鏈底層，生態負擔小。", "轉換飼料效率高，水產養殖碳排放相對較低。", "在地養殖技術成熟，族群數量穩定，是優良的蛋白質來源。"] 
             },
             { 
-                name: "南部海域 (台南高雄)", 
-                pos: [22.6, 120.1], 
-                fish: "虱目魚", 
-                status: "供給正常",
-                imgSrc: "jpg.2.jpg",
-                label: "在地養殖",
-                ecoList: [
-                    "草食與雜食性，屬於食物鏈底層。",
-                    "轉換飼料效率高，資源消耗少。",
-                    "養殖技術成熟，族群數量穩定。"
-                ]
-            },
-            { 
-                name: "東部海域 (花東外海)", 
-                pos: [23.5, 121.8], 
-                fish: "鬼頭刀 (飛烏虎)", 
-                status: "供給正常",
-                imgSrc: "jpg.3.png",
-                label: "野生捕撈",
-                ecoList: [
-                    "生長極為快速，一年即可達成熟體型。",
-                    "族群恢復力強，適合替代大型鮪魚。",
-                    "建議選擇「一支釣」等友善漁法來源。"
-                ]
+                name: "東部海域 (花東外海)", pos: [23.5, 121.8], fish: "鬼頭刀 (飛烏虎)", status: "短缺警示", 
+                imgSrc: "jpg.3.png", label: "野生捕撈", 
+                ecoList: ["生長極為快速，約一年即可達成熟體型，族群恢復力強。", "屬於表層洄游性魚類，適合做為大型鮪魚的替代海鮮。", "建議購買時認明「一支釣」等對混獲影響較小的友善漁法來源。"] 
             }
         ];
 
+        // 繪製地圖標記點
         regions.forEach(function(reg) {
-            // ★ 更新：加上白邊，讓藍點在深色衛星圖上更清楚
             var marker = L.circleMarker(reg.pos, {
-                color: '#ffffff',     // 邊框顏色 (白色)
-                weight: 2,            // 邊框粗細
-                fillColor: '#1a73e8', // 填充顏色 (藍色)
-                fillOpacity: 0.8,
-                radius: 11
+                color: '#0d6efd',
+                fillColor: '#0d6efd',
+                fillOpacity: 0.7,
+                radius: 12
             }).addTo(map);
 
-            marker.on('click', function(e) {
+            marker.on('click', function() {
                 showFishDetail(reg);
-                L.DomEvent.stopPropagation(e); 
             });
         });
 
+        // 點擊顯示下方詳細資訊邏輯
         function showFishDetail(data) {
+            // 隱藏預設提示，顯示詳細卡片
+            document.getElementById('emptyState').classList.add('d-none');
+            const detailCard = document.getElementById('fishDetailCard');
+            detailCard.classList.remove('d-none');
+
+            // 填入資料
             document.getElementById('cardTitle').innerText = data.fish;
-            document.getElementById('cardStatus').innerText = data.status;
-            
-            document.getElementById('cardImg').innerHTML = `<img src="${data.imgSrc}" alt="${data.fish}的照片" onerror="this.parentElement.innerHTML='[找不到照片：${data.imgSrc}]'">`;
-            
+            document.getElementById('cardRegion').innerText = data.name;
             document.getElementById('cardLabel').innerText = data.label;
             
+            // 處理狀態標籤
+            const statusEl = document.getElementById('cardStatus');
+            statusEl.innerText = data.status;
+            if (data.status === "短缺警示" || data.status === "需注意產量") {
+                statusEl.className = "badge bg-danger fs-6";
+            } else {
+                statusEl.className = "badge bg-success fs-6";
+            }
+            
+            // 插入照片
+            document.getElementById('cardImgContainer').innerHTML = `<img src="${data.imgSrc}" class="fish-img-large shadow-sm" alt="${data.fish}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/f1f3f4/a0aabf?text=圖片位於GitHub';">`;
+            
+            // 產生生態清單 (使用 Bootstrap list-group)
             const ecoListEl = document.getElementById('cardEcoList');
             ecoListEl.innerHTML = ""; 
-            data.ecoList.forEach(function(item) {
+            data.ecoList.forEach(item => {
                 let li = document.createElement("li");
-                li.innerText = item;
+                li.className = "list-group-item bg-transparent ps-0 border-0 d-flex align-items-start";
+                li.innerHTML = `<span class="me-2 text-success">✔️</span> <span>${item}</span>`;
                 ecoListEl.appendChild(li);
             });
 
-            const statusEl = document.getElementById('cardStatus');
-            if(data.status === "短缺警示" || data.status === "需注意產量") {
-                statusEl.className = "fish-status status-warn";
-            } else {
-                statusEl.className = "fish-status status-normal";
-            }
-
-            document.getElementById('fishCard').style.display = 'block';
-        }
-
-        function updateSeason(season) {
-            const btns = document.querySelectorAll('.season-btn');
-            btns.forEach(b => {
-                if(b.innerText === season) b.classList.add('active');
-                else b.classList.remove('active');
+            // 🌟 核心互動：平滑向下滾動到資訊區塊
+            document.getElementById('infoSection').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
             });
-            console.log("目前季節切換至：" + season);
         }
 
-        map.on('click', function() {
-            document.getElementById('fishCard').style.display = 'none';
-        });
+        // 季節按鈕切換邏輯
+        function updateSeason(season, btnElement) {
+            document.querySelectorAll('.season-btn').forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-light');
+            });
+            btnElement.classList.remove('btn-light');
+            btnElement.classList.add('btn-primary');
+        }
     </script>
 </body>
 </html>
