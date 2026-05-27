@@ -16,9 +16,23 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
+        /* 加入平滑滾動效果，讓導覽列錨點點擊時更滑順 */
+        html { scroll-behavior: smooth; }
         body { background-color: #f8f9fa; font-family: 'Google Sans', Roboto, Arial, sans-serif; }
         
-        /* 新增：頂部滿版大圖設計 (Hero Banner) */
+        /* 仿台北旅遊網頂部精美導覽列樣式 */
+        .hover-primary:hover {
+            color: #0d6efd !important;
+            transition: color 0.2s ease;
+        }
+        .nav-link {
+            transition: color 0.2s ease;
+        }
+        .nav-link:hover {
+            color: #0d6efd !important;
+        }
+        
+        /* 頂部滿版大圖設計 (Hero Banner) */
         .hero-section {
             width: 100%;
             height: 45vh; /* 佔據螢幕45%高度 */
@@ -50,11 +64,98 @@
         #emptyState { min-height: 200px; display: flex; align-items: center; justify-content: center; border: 2px dashed #dee2e6; border-radius: 12px; color: #6c757d; }
         @media (min-width: 992px) { .custom-w-75 { width: 75% !important; } }
         .season-badge { font-size: 0.8rem; margin-right: 8px; }
+
+        /* 永續指南區塊專用樣式 */
+        .guide-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .guide-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important; }
+        .light-indicator { width: 16px; height: 16px; border-radius: 50%; display: inline-block; margin-right: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- 更新：改用滿版大圖區塊取代原本的 Navbar -->
+    <!-- 
+      ================================================
+      【新版區塊】頂部精美導覽列 (仿台北旅遊網精緻設計)
+      ================================================
+    -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-2 shadow-sm">
+        <div class="container-fluid px-4">
+            <!-- 左側 Logo 與品牌字樣 -->
+            <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="#">
+                <!-- SVG 魚類永續標章 Logo -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-water me-2 text-info" viewBox="0 0 16 16">
+                    <path d="M.03 12.33c.311.162.661.278 1.045.278.434 0 .822-.15 1.157-.406.35-.267.652-.61 1.036-.913a4 4 0 0 1 1.258-.696 4 4 0 0 1 1.253.696c.384.303.686.646 1.036.913.335.256.723.406 1.157.406.384 0 .734-.116 1.045-.278V11.33a4 4 0 0 1-.58-.337 4 4 0 0 1-.957-1.127l-.003-.005a8 8 0 0 0-.585-.738 8 8 0 0 0-.585.738l-.003.005a4 4 0 0 1-.957 1.127 4 4 0 0 1-.58.337v1.001zm10.5 0c.311.162.661.278 1.045.278.434 0 .822-.15 1.157-.406.35-.267.652-.61 1.036-.913a4 4 0 0 1 1.258-.696 4 4 0 0 1 1.253.696c.384.303.686.646 1.036.913.335.256.723.406 1.157.406.384 0 .734-.116 1.045-.278V11.33a4 4 0 0 1-.58-.337 4 4 0 0 1-.957-1.127l-.003-.005a8 8 0 0 0-.585-.738 8 8 0 0 0-.585.738l-.003.005a4 4 0 0 1-.957 1.127 4 4 0 0 1-.58.337v1.001zM14 12.33c.311.162.661.278 1.045.278.384 0 .734-.116 1.045-.278V11.33a4 4 0 0 1-.58-.337 4 4 0 0 1-.957-1.127l-.003-.005a8 8 0 0 0-.585-.738 8 8 0 0 0-.585.738l-.003.005a4 4 0 0 1-.957 1.127 4 4 0 0 1-.58.337v1.001zm-7 0c.311.162.661.278 1.045.278.434 0 .822-.15 1.157-.406.35-.267.652-.61 1.036-.913a4 4 0 0 1 1.258-.696 4 4 0 0 1 1.253.696c.384.303.686.646 1.036.913.335.256.723.406 1.157.406.384 0 .734-.116 1.045-.278V11.33a4 4 0 0 1-.58-.337 4 4 0 0 1-.957-1.127l-.003-.005a8 8 0 0 0-.585-.738 8 8 0 0 0-.585.738l-.003.005a4 4 0 0 1-.957 1.127 4 4 0 0 1-.58.337v1.001z"/>
+                </svg>
+                臺灣永續漁樂圖鑑
+            </a>
+            
+            <!-- RWD 響應式折疊選單按鈕 -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- 選單內容 -->
+            <div class="collapse navbar-collapse" id="topNavbar">
+                <!-- 中間主要選單連結 -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 text-center">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold text-primary px-3" aria-current="page" href="#">互動地圖</a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- 連結已更新至 #guideSection -->
+                        <a class="nav-link px-3 text-secondary" href="#guideSection">永續指南</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 text-secondary" href="#" onclick="alert('歡迎點擊下方地圖右上角的篩選鈕切換春、夏、秋、冬特色漁獲！')">四季圖鑑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 text-secondary" href="https://scantf.github.io/SDG14" target="_blank">SDG 14 理念</a>
+                    </li>
+                </ul>
+                
+                <!-- 右側工具區 (搜尋圖示、語系選單) -->
+                <div class="d-flex align-items-center justify-content-center gap-3 mt-2 mt-lg-0">
+                    <a href="#" class="text-secondary hover-primary" onclick="alert('搜尋功能即將推出，敬請期待！')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </a>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 dropdown-toggle d-flex align-items-center gap-1" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-globe" viewBox="0 0 16 16">
+                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.418-1.25 1.139-1.638 2.062h3.276c-.389-.923-.969-1.644-1.638-2.062M5.63 4.542h4.74c-.266-1.026-.69-1.83-1.21-2.316-.52.486-.944 1.29-1.21 2.316M8.5 5.422c-.67.418-1.25 1.139-1.638 2.062h3.276c-.389-.923-.969-1.644-1.638-2.062m2.41 1.062h2.955a7 7 0 0 0-.663-1.923H10.91c.214.583.375 1.233.41 1.923M14.28 8h-3.32a7 7 0 0 1-.225 1.185h2.882A7 7 0 0 0 14.28 8M1.72 8h3.32a7 7 0 0 1 .225-1.185H2.383A7 7 0 0 0 1.72 8m3.91-1.923H2.663a7 7 0 0 0 .663 1.923H5.63a7 7 0 0 1-.41-1.923m-.01 2.985H2.663a7 7 0 0 0 .663 1.923H5.62a7 7 0 0 1-.41-1.923m1.062 1.923c.389.923.969 1.644 1.638 2.062.67-.418 1.25-1.139 1.638-2.062z"/>
+                            </svg>
+                            正體中文 ▼
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="langDropdown">
+                            <li><a class="dropdown-item active" href="#">正體中文</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="alert('English version is under construction!')">English</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="alert('日本語版は準備中です！')">日本語</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 麵包屑導覽區塊 -->
+    <div class="bg-light py-2 border-bottom">
+        <div class="container-fluid px-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
+                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">首頁</a></li>
+                    <li class="breadcrumb-item active text-secondary" aria-current="page">互動式漁獲地圖</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 
+      ================================================
+      【區塊 2】滿版大圖主視覺 (Hero Section)
+      ================================================
+    -->
     <header class="hero-section">
         <div class="hero-overlay">
             <h1 class="fw-bold text-white mb-3 shadow-text">臺灣海域漁獲動態視覺圖</h1>
@@ -63,7 +164,13 @@
         </div>
     </header>
 
+    <!-- 
+      ================================================
+      【區塊 3】主內容區 (地圖與資訊卡)
+      ================================================
+    -->
     <div class="container my-5">
+        <!-- 地圖區塊 -->
         <div class="row mb-4 justify-content-center">
             <div class="col-12 col-md-10 custom-w-75">
                 <div class="map-container">
@@ -80,11 +187,12 @@
             </div>
         </div>
 
-        <div class="row pb-5 justify-content-center" id="infoSection">
+        <!-- 漁獲詳細資訊區 -->
+        <div class="row justify-content-center" id="infoSection">
             <div class="col-12 col-md-10 custom-w-75">
                 <h3 class="fw-bold mb-3 border-bottom pb-2">📍 漁獲詳細資訊</h3>
                 <div id="emptyState" class="bg-white"><h5>👆 請在地圖上選擇一個海域</h5></div>
-                <div class="card shadow-sm border-0 d-none" id="fishDetailCard">
+                <div class="card shadow-sm border-0 d-none mb-5" id="fishDetailCard">
                     <div class="row g-0">
                         <div class="col-md-5 p-3">
                             <div class="bg-light rounded text-center h-100 d-flex align-items-center justify-content-center" id="cardImgContainer"></div>
@@ -108,6 +216,198 @@
         </div>
     </div>
 
+    <!-- 
+      ================================================
+      【區塊 5】永續指南 (Sustainability Guide)
+      ================================================
+    -->
+    <div id="guideSection" class="bg-white pt-5 pb-5 border-top">
+        <div class="container my-4">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-10">
+                    
+                    <!-- 標題與前言 -->
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold text-primary mb-3">🌊 台灣海洋永續海鮮消費指南</h2>
+                        <h5 class="text-muted fw-light">吃對海鮮，守護我們的藍色國土</h5>
+                    </div>
+                    
+                    <p class="lead mb-4" style="line-height: 1.8;">
+                        台灣四面環海，擁有豐富的海洋資源，島國的飲食文化更是與海鮮密不可分。然而，隨著過度捕撈、棲地破壞與氣候變遷，台灣周邊海域的漁業資源正面臨前所未有的危機。
+                    </p>
+                    <p class="fs-6 text-muted mb-5" style="line-height: 1.8;">
+                        本指南結合聯合國永續發展目標 <strong>SDG 14：永續海洋與保育</strong>，旨在引導消費者在日常生活中透過「聰明吃、正確選」，用消費者的力量改變漁業市場，讓餐桌上的美味與海洋生態並存。
+                    </p>
+
+                    <!-- 一、為什麼我們需要關注 -->
+                    <h4 class="fw-bold mb-3 border-start border-4 border-primary ps-3">📌 一、 為什麼我們需要關注「吃對海鮮」？</h4>
+                    <div class="card bg-light border-0 mb-5 p-4 guide-card">
+                        <p class="mb-3">根據科學研究，全球有超過 <strong>90%</strong> 的主要商業魚種正面臨「過度捕撈」或「已達捕撈上限」的窘境。如果我們維持現有的消費習慣，科學家預估在 2050 年前，人類可能會面臨無魚可吃的「空海」危機。</p>
+                        <p class="mb-0 text-primary fw-bold">海鮮並非取之不盡。「吃對海鮮」不是不吃海鮮，而是選擇對海洋環境負擔最小的物種。</p>
+                        <p class="mb-0 mt-2">透過改變購買習慣，我們可以促使漁民轉向友善漁法、支持負責任的養殖業，從而保護生物多樣性。</p>
+                    </div>
+
+                    <!-- 二、三大核心法則 -->
+                    <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">⚖️ 二、 永續海鮮挑選三大核心法則</h4>
+                    <p class="mb-4">在挑選海鮮時，只要牢記以下三個黃金法則，就能輕鬆實踐永續消費：</p>
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm guide-card">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark">1. 選擇食物鏈底層</h5>
+                                    <h6 class="card-subtitle mb-3 text-muted small">Eat Lower on the Food Chain</h6>
+                                    <p class="card-text small text-secondary"><strong>原理：</strong>大魚吃小魚，食物鏈越頂端的大型掠食者（如鮪魚、鯊魚、旗魚），需要消耗數十倍的能量才能成長，且因生物累積作用，體內往往累積了較高濃度的重金屬（如汞）。</p>
+                                    <p class="card-text small"><strong>行動：</strong>優先選擇以微藻、浮游生物或草食為主的魚貝類（如文蛤、虱目魚、秋刀魚），其繁衍速度快、數量穩定、生態負擔低。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm guide-card">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark">2. 在地與當季優先</h5>
+                                    <h6 class="card-subtitle mb-3 text-muted small">Local & Seasonal First</h6>
+                                    <p class="card-text small text-secondary"><strong>原理：</strong>進口海鮮需要長途空運或海運，會產生大量的溫室氣體（CO₂）排放。此外，非當季海鮮通常需要長期冷凍保存，亦耗費能源。</p>
+                                    <p class="card-text small"><strong>行動：</strong>多吃台灣在地捕撈或養殖的季節性魚類，不僅能吃到最鮮甜的滋味，還能大幅降低碳足跡。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm guide-card">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold text-dark">3. 友善漁法與養殖</h5>
+                                    <h6 class="card-subtitle mb-3 text-muted small">Eco-Friendly Methods</h6>
+                                    <p class="card-text small text-secondary"><strong>原理：</strong>底拖網會如推土機般摧毀海底珊瑚礁與生態系，並造成大量無辜生物被「混獲」致死。</p>
+                                    <p class="card-text small"><strong>行動：</strong><br>
+                                        • <strong>野生捕撈：</strong>優先選擇一支釣、定置網、或曳繩釣等對棲地破壞較小的漁獲。<br>
+                                        • <strong>水產養殖：</strong>優先選擇不需投餵動物性飼料或技術成熟、在地低碳的養殖品種。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 三、紅黃綠燈選擇指標 -->
+                    <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">🚦 三、 台灣海鮮「紅黃綠燈」選擇指標</h4>
+                    <p class="mb-4">參考中央研究院與各學術單位之海鮮指南，我們將台灣常見海鮮分為三大類別：</p>
+                    
+                    <div class="mb-4 p-4 border rounded shadow-sm guide-card border-success border-start border-5">
+                        <h5 class="fw-bold text-success"><span class="light-indicator bg-success"></span>綠燈：安心食用（建議優先選購）</h5>
+                        <p class="text-muted small mb-3">這些物種產量豐富、生長快速、捕撈或養殖方式對環境友善。</p>
+                        <ul class="mb-0 ps-3">
+                            <li><strong>虱目魚：</strong>在地養殖技術純熟，屬於雜食性，轉換飼料效率高。</li>
+                            <li><strong>文蛤（蛤蜊）：</strong>濾食性雙殼貝類，養殖時不需投餵飼料，還能淨化水質、固碳。</li>
+                            <li><strong>鬼頭刀：</strong>生長極快，一年即可達成熟體型，可作為大型鮪魚的優良替代品。</li>
+                            <li><strong>秋刀魚：</strong>洄游性魚類，數量多且捕撈方式（棒受網）目標單一，混獲率低。</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4 p-4 border rounded shadow-sm guide-card border-warning border-start border-5">
+                        <h5 class="fw-bold text-warning text-dark"><span class="light-indicator bg-warning"></span>黃燈：斟酌食用（偶爾品嚐，注意來源）</h5>
+                        <p class="text-muted small mb-3">這些物種可能面臨一定程度的捕撈壓力，或部分漁法對環境有中度影響。</p>
+                        <ul class="mb-0 ps-3">
+                            <li><strong>白帶魚：</strong>雖然族群數量尚可，但多採用曳繩釣或拖網，須留意捕撈漁法。</li>
+                            <li><strong>鎖管（小卷、透抽）：</strong>生長週期短，但強光誘捕（燈火漁業）易對周邊生態產生光害影響。</li>
+                            <li><strong>野生烏魚：</strong>冬至前後捕撈，具有文化價值，但野生族群易受氣候與過度捕撈波動影響（建議以養殖烏魚替代）。</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-5 p-4 border rounded shadow-sm guide-card border-danger border-start border-5">
+                        <h5 class="fw-bold text-danger"><span class="light-indicator bg-danger"></span>紅燈：避免食用（請減少或拒絕購買）</h5>
+                        <p class="text-muted small mb-3">這些物種生長緩慢、族群瀕危，或捕撈漁法對生態具有毁滅性破壞。</p>
+                        <ul class="mb-0 ps-3">
+                            <li><strong>黑鮪魚、藍鰭鮪魚：</strong>位於食物鏈頂端，面臨嚴重過度捕撈，且重金屬殘留風險高。</li>
+                            <li><strong>鯊魚（魚翅、豆腐鯊）：</strong>生長慢、繁殖率低，許多鯊魚已瀕臨滅絕。</li>
+                            <li><strong>吻仔魚：</strong>多為數十種魚類的「幼苗」混雜而成，過度捕撈等於「斬草除根」，會摧毀食物鏈基底。</li>
+                            <li><strong>珊瑚礁魚類（如鸚哥魚、野生石斑）：</strong>珊瑚礁的「園丁」，捕捉牠們會導致珊瑚礁生態系統失衡。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 四、四季餐桌提案 -->
+                    <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">🌸 四、 四季永續海鮮餐桌提案</h4>
+                    <p class="mb-4">配合台灣的洋流與氣候，不同季節都有其最合適的永續海鮮選擇，這也是我們網頁動態圖的核心精神：</p>
+                    <div class="table-responsive mb-5 guide-card shadow-sm rounded">
+                        <table class="table table-hover table-bordered text-center align-middle mb-0 bg-white">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" width="20%">季節</th>
+                                    <th scope="col" width="25%">推薦永續魚種</th>
+                                    <th scope="col">永續特點</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-success">春季 🌸</td>
+                                    <td><strong>鬼頭刀</strong></td>
+                                    <td class="text-start text-muted">隨著黑潮北上，成長極快。建議挑選「一支釣」來源。</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-danger">夏季 ☀️</td>
+                                    <td><strong>虱目魚</strong></td>
+                                    <td class="text-start text-muted">夏季是在地虱目魚的盛產期，高營養、低碳排、生態負擔極小。</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-warning text-dark">秋季 🍁</td>
+                                    <td><strong>文蛤</strong></td>
+                                    <td class="text-start text-muted">濾食水藻，不需要消耗魚粉飼料，碳足跡接近零。</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-primary">冬季 ❄️</td>
+                                    <td><strong>養殖烏魚</strong></td>
+                                    <td class="text-start text-muted">取代野生烏魚，減少對野生烏魚子母魚的捕撈壓力。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 五、日常實踐三問 -->
+                    <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">🤝 五、 日常實踐：在市場與餐廳的「三問」行動</h4>
+                    <div class="alert alert-info border-0 shadow-sm guide-card p-4">
+                        <p class="mb-4">當我們走進傳統市場、超市或海鮮餐廳時，可以透過簡單的詢問，讓商家知道消費者在意永續：</p>
+                        <div class="d-flex align-items-start mb-3">
+                            <h3 class="me-3 text-info">1️⃣</h3>
+                            <div>
+                                <h6 class="fw-bold mb-1">「這是野生捕撈的，還是養殖的？」</h6>
+                                <p class="small text-muted mb-0">如果是野生，盡量避免紅燈物種；如果是養殖，優先選擇草食或濾食性貝類。</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <h3 class="me-3 text-info">2️⃣</h3>
+                            <div>
+                                <h6 class="fw-bold mb-1">「這是用什麼方法抓到的？」</h6>
+                                <p class="small text-muted mb-0">支持「一支釣」、「定置網」或「竿釣」；避開「拖網」漁獲。</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-0">
+                            <h3 class="me-3 text-info">3️⃣</h3>
+                            <div>
+                                <h6 class="fw-bold mb-1">「這是台灣在地的，還是進口的？」</h6>
+                                <p class="small text-muted mb-0">優先支持台灣在地漁民，降低運輸碳足跡 (CO₂)。</p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-info">
+                        <p class="mb-0 text-center fw-bold fs-5 text-dark">
+                            海洋的未來，決定在我們每一次的消費選擇中。<br><span class="text-primary">吃對海鮮，就是我們給海洋最溫柔的承諾！</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [3-4] 頁尾版權宣告 -->
+    <footer class="bg-dark text-light py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-1">開發團隊：第二十組 (商逢育、李庭宇、吳絃竑)</p>
+            <p class="mb-0 small text-muted">資料來源：臺灣魚類資料庫、海洋保育署、臺灣海鮮選擇指南</p>
+        </div>
+    </footer>
+
+    <!-- 
+      ================================================
+      【區塊 4】互動邏輯 (JavaScript)
+      ================================================
+    -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -164,8 +464,8 @@
             { season: "冬季", seasonColor: "bg-primary", name: "澎湖及南部海域", pos: [23.5, 119.6], fish: "𩵚魠魚 (康氏馬加鰆)", scientificName: "Narrow-barred Spanish mackerel / Scomberomorus commerson", status: "需注意產量", imgSrc: "冬季/Narrow-barred Spanish mackerel.jpg", label: "野生捕撈", ecoList: ["冬季隨洋流南下，是台灣人最愛的年節魚種之一。", "屬於中高階掠食者，近年捕獲體型越來越小。", "需建立更完善的漁獲通報與體長限制。"] },
             { season: "冬季", seasonColor: "bg-primary", name: "北部海域", pos: [25.3, 121.7], fish: "剝皮魚 (單角革單棘魨)", scientificName: "Unicorn leatherjacket / Aluterus monoceros", status: "需注意產量", imgSrc: "冬季/Unicorn leatherjacket.jpg", label: "野生捕撈", ecoList: ["早年產量龐大，但因氣候變遷與過度捕撈，近年數量極不穩定。", "常作為火鍋料或加工品。", "建議多關注其產地與捕撈方式。"] },
             { season: "冬季", seasonColor: "bg-primary", name: "西南沿海", pos: [22.8, 120.0], fish: "狗母梭", scientificName: "Brushtooth lizardfish / Saurida undosquamis", status: "需注意產量", imgSrc: "冬季/Brushtooth lizardfish.jpg", label: "野生捕撈", ecoList: ["主要用於製作魚丸、魚鬆等加工食品。", "經常是底拖網漁業的混獲物種。", "加工過程難以追溯來源，存在過度捕撈的隱憂。"] },
-            { season: "冬季", seasonColor: "bg-primary", name: "西部海域 (新竹至台南)", pos: [23.8, 119.9], fish: "野生烏魚 (海烏)", scientificName: "Flathead grey mullet / Mugil cephalus", status: "短缺警示", imgSrc: "冬季/Flathead grey mullet.jpg", label: "野生捕撈", ecoList: ["早期被稱為「烏金」，但氣候變遷與中國沿岸攔截捕撈，導致來台的野生族群大減。", "為保護野生資源，強烈建議改購買養殖烏魚。"] },
-            { season: "冬季", seasonColor: "bg-primary", name: "全台沿岸", pos: [24.5, 120.8], fish: "魩仔魚 (多種魚類幼苗)", scientificName: "Whitebait (Juvenile fish) / Engraulidae", status: "短缺警示", imgSrc: "冬季/Engraulidae.jpg", label: "野生捕撈", ecoList: ["並非單一魚種，而是多達數十種經濟魚類的「幼魚」總稱。", "大量捕撈幼苗會造成海洋食物鏈斷層與資源枯竭。", "應盡量減少食用。"] },
+            { season: "冬季", seasonColor: "bg-primary", name: "西部海域 (新竹至台南)", pos: [23.8, 119.9], fish: "野生烏魚 (海烏)", scientificName: "Flathead grey mullet / Mugil cephalus", status: "短缺警示", imgSrc: "冬季/Flathead grey mullet.jpg", label: "野生捕撈", ecoList: ["早期被稱為 \"烏金\"，但氣候變遷與中國沿岸攔截捕撈，導致來台的野生族群大減。", "為保護野生資源，強烈建議改購買養殖烏魚。"] },
+            { season: "冬季", seasonColor: "bg-primary", name: "全台沿岸", pos: [24.5, 120.8], fish: "魩仔魚 (多種魚類幼苗)", scientificName: "Whitebait (Juvenile fish) / Engraulidae", status: "短缺警示", imgSrc: "冬季/Engraulidae.jpg", label: "野生捕撈", ecoList: ["並非單一魚種，而是多達數十種經濟魚類的 \"幼魚\" 總稱。", "大量捕撈幼苗會造成海洋食物鏈斷層與資源枯竭。", "應盡量減少食用。"] },
             { season: "冬季", seasonColor: "bg-primary", name: "東部及南部礁岩區", pos: [22.0, 120.9], fish: "野生錦繡龍蝦", scientificName: "Ornate spiny lobster / Panulirus ornatus", status: "短缺警示", imgSrc: "冬季/Ornate spiny lobster.jpg", label: "野生捕撈", ecoList: ["多棲息於珊瑚礁岩縫中，生長極度緩慢。", "深受潛水打魚或無差別底拖網的威脅。", "因極高經濟價值導致被嚴重過度捕撈，族群難以恢復。"] }
         ];
 
