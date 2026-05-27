@@ -56,12 +56,13 @@
             transition: all 0.2s;
         }
 
-        /* 下方資訊區塊照片設定 */
+       /* 下方資訊區塊照片設定 */
         .fish-img-large { 
             width: 100%; 
             height: 300px; 
-            object-fit: cover; 
+            object-fit: contain; /* 關鍵：從 cover 改成 contain */
             border-radius: 8px; 
+            background-color: #ffffff; /* 可選：讓留白的地方保持純白，跟魚的去背底色融合 */    
         }
 
         /* 預設提示區塊 */
