@@ -97,8 +97,17 @@
 
         // 核心漁獲資料庫
         var regions = [
-            // ================== 春季 ==================
-            { season: "春季", seasonColor: "bg-success", name: "東部海域 (花東外海)", pos: [23.5, 121.8], fish: "鬼頭刀 (飛烏虎)", scientificName: "Mahi-mahi / Coryphaena hippurus", status: "供給正常", imgSrc: "Mahi-mahi.jpg", label: "野生捕撈", ecoList: ["生長極為快速，約一年即可達成熟體型。", "屬於表層洄游性魚類，適合替代大型鮪魚。", "建議選擇「一支釣」等友善漁法來源。"] },
+            // ================== 春季 (10種) ==================
+            { season: "春季", seasonColor: "bg-success", name: "東部海域 (花東外海)", pos: [23.5, 121.8], fish: "鬼頭刀 (飛烏虎)", scientificName: "Mahi-mahi / Coryphaena hippurus", status: "供給正常", imgSrc: "春季/Coryphaena hippurus.JPG", label: "野生捕撈", ecoList: ["生長極為快速，約一年即可達成熟體型。", "屬於表層洄游性魚類，適合替代大型鮪魚。", "建議選擇「一支釣」等友善漁法來源。"] },
+            { season: "春季", seasonColor: "bg-success", name: "南部海域 (屏東東港)", pos: [22.4, 120.4], fish: "櫻花蝦", scientificName: "Sakura shrimp / Lucensosergia lucens", status: "供給正常", imgSrc: "春季/Sakura shrimp.jpg", label: "野生捕撈", ecoList: ["台灣特有資源，實施嚴格的總量管制與禁漁期。", "屬於食物鏈底層，資源恢復快。", "捕撈規範完善，是永續漁業的良好典範。"] },
+            { season: "春季", seasonColor: "bg-success", name: "中南部海域 (雲嘉南沿海)", pos: [23.3, 120.1], fish: "臺灣鯛 (改良吳郭魚)", scientificName: "Taiwan Tilapia / Oreochromis spp.", status: "供給正常", imgSrc: "春季/Taiwan Tilapia.JPG", label: "在地養殖", ecoList: ["屬於雜食性，對人工飼料適應力極強。", "抗病力高，生長週期短。", "養殖技術極度成熟，能穩定供應優質蛋白質。"] },
+            { season: "春季", seasonColor: "bg-success", name: "東部海域", pos: [24.0, 122.0], fish: "正鰹 (煙仔魚)", scientificName: "Skipjack tuna / Katsuwonus pelamis", status: "供給正常", imgSrc: "春季/Skipjack tuna.jpg", label: "野生捕撈", ecoList: ["生長快速且繁殖力強的中表層洄游魚類。", "數量相對龐大，資源尚屬穩定。", "建議選擇單線釣法或曳繩釣捕獲的來源。"] },
+            { season: "春季", seasonColor: "bg-success", name: "南部海域 (高雄、屏東)", pos: [22.6, 120.25], fish: "石斑魚", scientificName: "Grouper / Epinephelus spp.", status: "供給正常", imgSrc: "春季/Grouper.jpg", label: "在地養殖", ecoList: ["台灣室內外循環水養殖技術成熟。", "可減少對野生珊瑚礁魚類的捕撈壓力。", "需注意飼料來源是否符合永續標準。"] },
+            { season: "春季", seasonColor: "bg-success", name: "東北角海域 (宜蘭蘇澳)", pos: [24.6, 121.9], fish: "鯖魚 (花飛)", scientificName: "Chub mackerel / Scomber japonicus", status: "需注意產量", imgSrc: "春季/Chub mackerel.jpg", label: "野生捕撈", ecoList: ["屬於食物鏈中下層，原本資源豐富。", "近年因過度捕撈導致體型逐漸縮小。", "建議消費者選擇體型較大（超過20公分）的成魚。"] },
+            { season: "春季", seasonColor: "bg-success", name: "東部海域 (蘭嶼、綠島)", pos: [22.1, 121.5], fish: "飛魚", scientificName: "Flying fish / Exocoetidae", status: "需注意產量", imgSrc: "春季/Flying fish.jpg", label: "野生捕撈", ecoList: ["具有季節性洄游特性的表層魚類。", "傳統達悟族捕捉方式具備永續精神。", "應避免使用流刺網大規模商業捕撈。"] },
+            { season: "春季", seasonColor: "bg-success", name: "東部海域 (花蓮)", pos: [23.9, 121.7], fish: "曼波魚 (翻車魚)", scientificName: "Ocean sunfish / Mola mola", status: "短缺警示", imgSrc: "春季/Ocean sunfish.jpg", label: "野生捕撈", ecoList: ["行動緩慢，常成為定置網的無辜混獲物。", "屬於大洋性魚類，族群數量與生態資訊仍不足。", "缺乏有效管理機制，不建議食用。"] },
+            { season: "春季", seasonColor: "bg-success", name: "南部海域 (屏東東港)", pos: [22.3, 120.35], fish: "黑鮪魚", scientificName: "Pacific bluefin tuna / Thunnus orientalis", status: "短缺警示", imgSrc: "春季/Pacific bluefin tuna.jpg", label: "野生捕撈", ecoList: ["屬於海洋頂級掠食者，生長極度緩慢且壽命長。", "累積重金屬風險較高。", "長期面臨嚴重過度捕撈壓力，野生族群枯竭。"] },
+            { season: "春季", seasonColor: "bg-success", name: "西部海域 (雲嘉南)", pos: [23.6, 120.1], fish: "日本鰻 (鰻魚)", scientificName: "Japanese eel / Anguilla japonica", status: "短缺警示", imgSrc: "春季/Japanese eel.jpg", label: "依賴野生魚苗養殖", ecoList: ["人工無法繁殖魚苗，完全依賴捕撈野生「玻璃白魚」。", "過度捕撈與河川棲地破壞導致魚苗銳減。", "已被列為瀕危物種。"] },
             
             // ================== 夏季 (10種) ==================
             { season: "夏季", seasonColor: "bg-danger", name: "南部海域 (台南、高雄)", pos: [22.8, 120.1], fish: "虱目魚", scientificName: "Milkfish / Chanos chanos", status: "供給正常", imgSrc: "夏季/Chanos_chanos.JPG", label: "在地養殖", ecoList: ["草食與雜食性，屬於食物鏈底層，生態負擔小。", "轉換飼料效率高，水產養殖碳排放較低。", "在地養殖技術成熟，族群數量穩定。"] },
