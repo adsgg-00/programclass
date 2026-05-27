@@ -36,7 +36,7 @@
         /* 地圖容器設定 (變成直立小視窗) */
         .map-container {
             position: relative;
-            height: 525px; /* 增加高度，配合臺灣南北狹長的特性 */
+            height: 600px; /* 增加高度，配合臺灣南北狹長的特性 */
             width: 100%;
             border-radius: 12px;
             overflow: hidden; /* 確保地圖不會超出圓角 */
@@ -74,6 +74,11 @@
             border-radius: 12px;
             color: #6c757d;
         }
+
+        /* 自訂 75% 寬度 (適用於電腦大螢幕) */
+        @media (min-width: 992px) {
+            .custom-w-75 { width: 75% !important; }
+        }
     </style>
 </head>
 <body>
@@ -99,7 +104,7 @@
         
         <!-- [3-2] 地圖區塊 (上半部) -->
         <div class="row mb-4 justify-content-center">
-            <div class="col-12 col-md-6 col-lg-4">
+            <div class="col-12 col-md-10 custom-w-75">
                 <div class="map-container">
                     <div id="map"></div>
                     <!-- 四季按鈕 -->
@@ -116,7 +121,7 @@
 
         <!-- [3-3] 詳細資訊區塊 (下半部) -->
         <div class="row pb-5 justify-content-center" id="infoSection">
-            <div class="col-12 col-md-10 col-lg-8">
+            <div class="col-12 col-md-10 custom-w-75">
                 <h3 class="fw-bold mb-3 border-bottom pb-2">📍 漁獲詳細資訊</h3>
                 
                 <!-- 狀態A：還沒點擊時顯示的預設畫面 -->
