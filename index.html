@@ -46,13 +46,14 @@
                 <div class="map-container">
                     <div id="map"></div>
                     <div class="season-controls">
-                        <button class="btn btn-primary season-btn" onclick="updateSeason('春', this)">春</button>
-                        <button class="btn btn-light season-btn" onclick="updateSeason('夏', this)">夏</button>
+                        <!-- 預設改為顯示夏季 -->
+                        <button class="btn btn-light season-btn" onclick="updateSeason('春', this)">春</button>
+                        <button class="btn btn-primary season-btn" onclick="updateSeason('夏', this)">夏</button>
                         <button class="btn btn-light season-btn" onclick="updateSeason('秋', this)">秋</button>
                         <button class="btn btn-light season-btn" onclick="updateSeason('冬', this)">冬</button>
                     </div>
                 </div>
-                <p class="text-muted small mt-3 text-center">💡 提示：點擊地圖上的藍色圓點，即可查看該海域的詳細漁獲資訊。</p>
+                <p class="text-muted small mt-3 text-center">💡 提示：點擊右上角切換季節，並點擊地圖圓點查看該海域詳細資訊。</p>
             </div>
         </div>
 
@@ -88,49 +89,93 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // 初始化地圖
         var map = L.map('map', { minZoom: 6 }).setView([23.6, 121.0], 7); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 
-        // 建立一個圖層群組來統一管理標記，這樣切換季節時才能方便地清除舊標記
-        var markerGroup = L.layerGroup().addTo(map);
+        // 儲存地圖上目前的標記點，方便切換季節時清除
+        var currentMarkers = [];
 
-        // 漁獲資料陣列
+        // 核心漁獲資料庫
         var regions = [
+            // ================== 春季 ==================
             { season: "春季", seasonColor: "bg-success", name: "東部海域 (花東外海)", pos: [23.5, 121.8], fish: "鬼頭刀 (飛烏虎)", scientificName: "Mahi-mahi / Coryphaena hippurus", status: "供給正常", imgSrc: "Mahi-mahi.jpg", label: "野生捕撈", ecoList: ["生長極為快速，約一年即可達成熟體型。", "屬於表層洄游性魚類，適合替代大型鮪魚。", "建議選擇「一支釣」等友善漁法來源。"] },
-            { season: "夏季", seasonColor: "bg-danger", name: "南部海域 (台南、高雄)", pos: [22.8, 120.1], fish: "虱目魚", scientificName: "Milkfish / Chanos chanos", status: "供給正常", imgSrc: "Milkfish.jpg", label: "在地養殖", ecoList: ["草食與雜食性，屬於食物鏈底層，生態負擔小。", "轉換飼料效率高，水產養殖碳排放較低。", "在地養殖技術成熟，族群數量穩定。"] },
+            
+            // ================== 夏季 (10種) ==================
+            { season: "夏季", seasonColor: "bg-danger", name: "南部海域 (台南、高雄)", pos: [22.8, 120.1], fish: "虱目魚", scientificName: "Milkfish / Chanos chanos", status: "供給正常", imgSrc: "夏季/Chanos_chanos.JPG", label: "在地養殖", ecoList: ["草食與雜食性，屬於食物鏈底層，生態負擔小。", "轉換飼料效率高，水產養殖碳排放較低。", "在地養殖技術成熟，族群數量穩定。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "西部海域 (嘉義外海)", pos: [23.45, 120.0], fish: "牡蠣 (蚵仔)", scientificName: "Pacific oyster / Magallana gigas", status: "供給正常", imgSrc: "夏季/Crassostrea_gigas.jpg", label: "在地養殖", ecoList: ["濾食性雙殼貝類，無須投餵人工飼料。", "具有淨化水質的功能，對海洋環境極為友善。", "在地生產，碳足跡極低。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "東北角海域 (貢寮)", pos: [25.05, 122.0], fish: "九孔 (台灣鮑魚)", scientificName: "Small abalone / Haliotis diversicolor", status: "供給正常", imgSrc: "夏季/Small_Abalone.jpg", label: "在地養殖", ecoList: ["以天然海藻為食，不需依賴魚粉飼料。", "潮間帶養殖池設計對海岸生態影響較小。", "在地養殖存活率與品質皆已提升。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "西南部海域", pos: [23.0, 120.05], fish: "金目鱸魚", scientificName: "Barramundi / Lates calcarifer", status: "供給正常", imgSrc: "夏季/Barramundi.jpg", label: "在地養殖", ecoList: ["生長迅速適應力強，是台灣重要養殖魚種。", "能有效將植物性蛋白轉換為肉類。", "減少野生肉食性魚類的依賴。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "澎湖海域", pos: [23.6, 119.5], fish: "海鱺", scientificName: "Cobia / Rachycentron canadum", status: "供給正常", imgSrc: "夏季/cobia.jpg", label: "在地箱網養殖", ecoList: ["海上箱網養殖技術成熟，生長速度快。", "肉質佳且無細刺，經濟價值高。", "需注意養殖區的海水流通與環境承載力。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "北部海域 (基隆外海)", pos: [25.2, 121.8], fish: "鎖管 (小卷 / 透抽)", scientificName: "Swordtip squid / Uroteuthis edulis", status: "需注意產量", imgSrc: "夏季/Swordtip squid.jpg", label: "野生捕撈", ecoList: ["生命週期短、繁殖力強，資源恢復相對較快。", "近年氣候變遷與捕撈壓力使體型縮水。", "建議選擇長度超過 15 公分的成體。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "北部海域 (萬里)", pos: [25.25, 121.65], fish: "遠海梭子蟹 (花蟹)", scientificName: "Blue swimming crab / Portunus pelagicus", status: "需注意產量", imgSrc: "夏季/Blue swimming crab.jpg", label: "野生捕撈", ecoList: ["利用蟹籠誘捕，對海底棲地破壞較拖網小。", "受限於繁殖期與甲殼寬度管制。", "請拒絕購買抱卵母蟹與體型過小的幼蟹。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "北部及東部海域", pos: [24.8, 122.1], fish: "白帶魚", scientificName: "Largehead hairtail / Trichiurus lepturus", status: "需注意產量", imgSrc: "夏季/Largehead hairtail.png", label: "野生捕撈", ecoList: ["為近海重要經濟魚類，但常遭底拖網大量捕獲。", "拖網容易造成棲地破壞與大量混獲。", "建議選擇一支釣捕獲的白帶魚。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "西南部海域", pos: [22.5, 120.0], fish: "刺鯧 (肉魚)", scientificName: "Pacific rudderfish / Psenopsis anomala", status: "短缺警示", imgSrc: "夏季/Pacific rudderfish.jpg", label: "野生捕撈", ecoList: ["傳統平價海鮮，但幾乎全靠底拖網捕撈。", "底拖網嚴重破壞海床生態，混獲率極高。", "近年野生體型與產量皆大幅銳減。"] },
+            { season: "夏季", seasonColor: "bg-danger", name: "南部海域 (墾丁)", pos: [21.9, 120.8], fish: "鸚哥魚 (珊瑚礁魚類)", scientificName: "Parrotfish / Scaridae", status: "短缺警示", imgSrc: "夏季/Parrotfish.jpg", label: "野生捕撈", ecoList: ["以啃食珊瑚礁上的海藻為生，是維持珊瑚礁健康的「清道夫」。", "若被大量捕撈，珊瑚將被海藻覆蓋而死亡。", "具極高生態價值，應絕對拒食。"] },
+
+            // ================== 秋季 ==================
             { season: "秋季", seasonColor: "bg-warning text-dark", name: "西部海域 (彰化、雲林)", pos: [23.8, 120.1], fish: "文蛤 (蛤蜊)", scientificName: "Hard clam / Meretrix lusoria", status: "供給正常", imgSrc: "Hard clam.png", label: "在地養殖", ecoList: ["屬於濾食性雙殼貝類，養殖過程不需大量投餵飼料。", "能有效利用水中的微藻，有助於維持水質平衡。", "在地生產，運輸距離短，碳足跡極低。"] },
+            
+            // ================== 冬季 ==================
             { season: "冬季", seasonColor: "bg-primary", name: "西南部海域 (新竹至台南)", pos: [24.0, 119.8], fish: "養殖烏魚", scientificName: "Flathead grey mullet / Mugil cephalus", status: "供給正常", imgSrc: "Flathead grey mullet.jpg", label: "在地養殖", ecoList: ["選擇養殖烏魚可大幅減少對野生洄游族群的捕撈壓力。", "屬於草雜食性，轉換飼料效率高。", "魚肉與魚卵皆可完全利用。"] }
         ];
 
-        // 渲染指定季節標記的函數
-        function renderMarkers(targetSeason) {
-            // 1. 先清除地圖上現有的所有標記
-            markerGroup.clearLayers();
+        // 渲染地圖標記點的函式
+        function renderMarkers(seasonFilter) {
+            // 1. 清除舊的標記點
+            currentMarkers.forEach(marker => map.removeLayer(marker));
+            currentMarkers = [];
 
-            // 2. 篩選並加入符合該季節的標記
-            regions.forEach(reg => {
-                if (reg.season.includes(targetSeason)) {
-                    L.circleMarker(reg.pos, { color: '#0d6efd', fillColor: '#0d6efd', fillOpacity: 0.7, radius: 12 })
-                    .addTo(markerGroup)
-                    .on('click', () => showFishDetail(reg));
-                }
+            // 2. 根據選擇的季節過濾資料
+            let filteredRegions = regions.filter(reg => reg.season === seasonFilter);
+
+            // 3. 重新在地圖上繪製標記點
+            filteredRegions.forEach(reg => {
+                // 根據季節設定圓點顏色
+                let markerColor = '#0d6efd'; 
+                if (reg.season === '春季') markerColor = '#198754';
+                if (reg.season === '夏季') markerColor = '#dc3545';
+                if (reg.season === '秋季') markerColor = '#ffc107';
+                
+                let marker = L.circleMarker(reg.pos, { 
+                    color: markerColor, 
+                    fillColor: markerColor, 
+                    fillOpacity: 0.7, 
+                    radius: 12 
+                }).addTo(map);
+
+                marker.on('click', () => showFishDetail(reg));
+                currentMarkers.push(marker); // 存入陣列供下次清除
             });
         }
 
-        // 顯示漁獲詳細資訊
+        // 點擊顯示下方詳細資訊邏輯
         function showFishDetail(data) {
             document.getElementById('emptyState').classList.add('d-none');
             const detailCard = document.getElementById('fishDetailCard');
             detailCard.classList.remove('d-none');
+            
             document.getElementById('cardTitle').innerText = data.fish;
             document.getElementById('cardScientificName').innerText = data.scientificName;
             document.getElementById('cardRegion').innerText = data.name;
             document.getElementById('cardLabel').innerText = data.label;
+            
             const seasonBadge = document.getElementById('cardSeasonBadge');
             seasonBadge.innerText = data.season;
             seasonBadge.className = `badge rounded-pill season-badge ${data.seasonColor}`;
+            
+            // 根據供給狀態切換紅/黃/綠燈
+            const statusEl = document.getElementById('cardStatus');
+            statusEl.innerText = data.status;
+            if (data.status === "短缺警示") {
+                statusEl.className = "badge bg-danger fs-6";
+            } else if (data.status === "需注意產量") {
+                statusEl.className = "badge bg-warning text-dark fs-6";
+            } else {
+                statusEl.className = "badge bg-success fs-6";
+            }
+
             document.getElementById('cardImgContainer').innerHTML = `<img src="${data.imgSrc}" class="fish-img-large shadow-sm" alt="${data.fish}" onerror="this.src='https://placehold.co/600x400?text=Image+Not+Found';">`;
+            
             const ecoListEl = document.getElementById('cardEcoList');
             ecoListEl.innerHTML = ""; 
             data.ecoList.forEach(item => {
@@ -139,12 +184,13 @@
                 li.innerHTML = `<span class="me-2 text-success">✔️</span> <span>${item}</span>`;
                 ecoListEl.appendChild(li);
             });
+            
             document.getElementById('infoSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // 切換季節功能
-        function updateSeason(season, btnElement) {
-            // 更新按鈕樣式
+        // 季節按鈕切換邏輯
+        function updateSeason(seasonPrefix, btnElement) {
+            // 切換按鈕的活躍樣式
             document.querySelectorAll('.season-btn').forEach(b => { 
                 b.classList.remove('btn-primary'); 
                 b.classList.add('btn-light'); 
@@ -152,16 +198,18 @@
             btnElement.classList.remove('btn-light'); 
             btnElement.classList.add('btn-primary');
 
-            // 重新渲染該季節的標記
-            renderMarkers(season);
-
-            // 切換季節時，將詳細資訊隱藏，恢復成提示點擊的狀態
+            // 切換季節時，隱藏目前的資訊卡，恢復提示狀態
             document.getElementById('emptyState').classList.remove('d-none');
             document.getElementById('fishDetailCard').classList.add('d-none');
+
+            // 呼叫渲染函式 (例如傳入 '夏季')
+            renderMarkers(seasonPrefix + '季');
         }
 
-        // 頁面載入時，預設顯示「春季」的資料
-        renderMarkers('春');
+        // 網頁載入時，預設顯示「夏季」的漁獲
+        window.onload = () => {
+            renderMarkers('夏季');
+        };
 
     </script>
 </body>
